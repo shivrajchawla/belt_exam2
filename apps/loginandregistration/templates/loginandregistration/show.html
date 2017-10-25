@@ -14,8 +14,8 @@
     <h1>Yo! Logged in!</h1>
     <div class="container">
         <h1>User ID: {{shit.id}}</h1>
-        <h2>First Name: {{shit.first_name}}</h2>
-        <h2>Last Name: {{shit.last_name}}</h2>
+        <h2>Session ID: {{request.session.user_id}}</h2>
+        <h2>Name: {{shit.name}}</h2>
         <h2>Email: {{shit.email}}</h2>
         <h3>Created At: {{shit.created_at}}</h3>
         <h3>Updated At: {{shit.updated_at}}</h3>

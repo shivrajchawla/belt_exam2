@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+    
+<head>
+        <title>Friends Dashboard</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+            crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+            crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+            crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+            crossorigin="anonymous"></script>
+</head>
+    
+<body>
+    <div class="container">
+            <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
+                    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                      <span class="navbar-toggler-icon"></span>
+                    </button> 
+                    <h1>Hello {{user.name}}!</h1>                 
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                      <ul class="nav navbar-nav navbar-right">
+                        <li class="nav-item active">
+                          <a class="nav-link" href="/logout">Logout</a>
+                        </li>
+                      </ul>
+                    </div>
+                  </nav>
+        <br>
+        <h3>Here is a list of your friends:</h3>
+        {% if count_of_myfriends == 0 %}
+        <h1>YOU HAVE NO FRIENDS</h1>
+        {% endif %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Alias</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+        {% for person in my_friends %}
+            <tr>
+                <td>{{person.alias}} </td>
+                <td>
+                    <a href="/friends/user/{{person.id}}">View Profile</a>
+                    <a href="/friends/remove_friend/{{person.id}}">Remove Friend</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+        <br>
+        <h3>Other Users not on my friend's list:</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Alias</th>
+                    <th>Action</th>
+                </tr>
+            </thead>    
+        {% for person in other_friends %}
+        <tr>
+        <td><a href="/friends/user/{{person.id}}">{{person.alias}}</a></td>
+        <td><a href= "/friends/add_friend/{{person.id}}"><button>ADD FRIEND</button></a></td>
+        </tr>
+        {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

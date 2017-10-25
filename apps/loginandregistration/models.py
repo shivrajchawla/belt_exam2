@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import bcrypt, re
 from datetime import datetime
 from time import strftime,localtime
-EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9\.\+_-]+@[a-zA-Z0-9\._-]+\.[a-zA-Z]*$')
+#EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9\.\+_-]+@[a-zA-Z0-9\._-]+\.[a-zA-Z]*$')
 #PASSWORD_REGEX = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$')
 from django.db import models
 
@@ -22,56 +22,63 @@ class UserManager(models.Manager): #this is the django models.manager class whic
 
     def valid_register(self, post): #pass in self because OOP, how can I explain it
         email = post['email'].lower()  #this is getting all the shit from your form for checking
+        name = post['name']
+        alias = post['alias']
         cpassword = post['cpassword']
         password = post['password']
-        first_name = post['first_name']
-        last_name = post['last_name']
-
+        
         errors = [] #create empty array and append fails into this
-
-        if len(email) < 6 or len(email) > 30: #each validation should add to your errors array
-            errors.append('Email must be 6-30char long yo')
-        elif not EMAIL_REGEX.match(email):
-            errors.append('Your email is invalid yo')
 
         if len(password) < 8:
             errors.append('Password too few characters yo')
         elif cpassword != password:
             errors.append('Passwords dont match yo')
 
-        if len(first_name) < 2:
-            errors.append("Your first name cannot be that short yo")
-        elif not first_name.isalpha():
-            errors.append('Your first name must be letters yo')
-
-        if len(last_name) < 2:
-            errors.append('Your last name cannot be that short yo')
-        elif not last_name.isalpha():
-            errors.append('Your last name must be letters yo') 
-        
-        
-        if not errors:
-            users = self.filter(email=email) # so this is querying the user table to find an email. filter returns a list of emails
-            if users: #if any email exists (coming back into the variable), then that means they're already a user
-                errors.append('email already taken')
+        if len(name) < 3:
+            errors.append("Your name cannot be that short yo")    
         
         return {'status': len(errors) == 0, 'errors':errors} #this says return a dictionary of the "errors" array and a status. If the length of arrays is 0
     
     def create_user(self,post): #this method creates the actual user
-        first_name = post['first_name'] #get shit from the form
-        last_name = post['last_name']
-        email = post['email'].lower() #always set the email to lower
+        email = post['email'].lower()  #this is getting all the shit from your form for checking
+        name = post['name']
+        alias = post['alias']
         password = bcrypt.hashpw(post['password'].encode(), bcrypt.gensalt()) #collect the password
-        return self.create(first_name = first_name, email = email, last_name = last_name, password = password) #throw that shit into the database query of "create" and it'll put it into the db
+        return self.create(name=name, alias=alias, password=password, email=email ) #throw that shit into the database query of "create" and it'll put it into the db
+
+    def add_friend(self,user_id,friend_id):
+        user = User.objects.get(id=user_id)
+        friend = User.objects.get(id=friend_id)
+        user.friended.add(friend)
+        return friend
+    
+    def remove_friend(self,user_id,friend_id):
+        user = User.objects.get(id=user_id)
+        friend = User.objects.get(id=friend_id)
+        user.friended.remove(friend)
+        return friend
+        
+
+    def show_friends(self,user_id):
+        user = User.objects.get(id = user_id)
+        other_users = User.objects.all()
+        data = {
+            "user" : user,
+            "my_friends" : other_users.filter(friended=user),
+            "other_friends" : other_users.exclude(friended=user),
+            "count_of_myfriends" : len(other_users.filter(friended=user))
+        }
+        return data
 
 class User(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255)
+    name = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    alias = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add = True)
     updated_at = models.DateTimeField(auto_now = True)
     password = models.CharField(max_length=255)
+    friended = models.ManyToManyField('self', related_name="friended_by")
     objects = UserManager() #this inherits from god manager now AND usermanager
     def __str__(self): #always add this so it looks prettier when printing
-        return "{} {} {} {}".format(self.first_name,self.last_name,self.email,self.password)
+        return "{} {} {} {}".format(self.name,self.email,self.alias,self.password)
 # Create your models here.
